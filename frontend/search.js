@@ -428,6 +428,16 @@ function renderResults(results, query) {
         item.innerHTML = `
             <span class="result-time">${time}</span>
             <div class="result-text">${text}</div>
+            <div class="result-item-footer">
+                <button class="download-btn" onclick="event.stopPropagation(); downloadClip('${res.start || res.start_time}', '${res.end || res.end_time || (res.start || res.start_time) + 10}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Clip
+                </button>
+            </div>
         `;
         
         item.onclick = () => {
@@ -437,6 +447,40 @@ function renderResults(results, query) {
         
         resultsList.appendChild(item);
     });
+}
+
+async function downloadClip(start, end) {
+    if (!currentId) return;
+    
+    // Show toast or some indicator
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    toastMessage.textContent = "Preparing your clip... please wait.";
+    toast.classList.remove('hidden');
+
+    try {
+        const url = `${API_BASE}/api/clip/${currentId}?start=${start}&end=${end}`;
+        const res = await fetch(url);
+        
+        if (!res.ok) throw new Error('Failed to generate clip');
+        
+        const blob = await res.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `clip_${currentId}_${start}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        a.remove();
+        
+        toastMessage.textContent = "Clip downloaded successfully!";
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    } catch (e) {
+        console.error('Download error', e);
+        toastMessage.textContent = "Failed to generate clip.";
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
 }
 
 function highlight(text, query) {

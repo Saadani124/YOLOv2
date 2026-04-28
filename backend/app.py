@@ -17,7 +17,7 @@ from config import (
     CORS_ALLOW_HEADERS, FRONTEND_DIR, DATABASE_URL
 )
 from database.core import init_db
-from routers import video, progress, search, analysis
+from routers import video, progress, search, analysis, clip, collections
 from services.ffmpeg import find_ffmpeg, patch_whisper_audio_loader, is_ffmpeg_available
 
 
@@ -70,6 +70,8 @@ app.include_router(video.router)
 app.include_router(progress.router)
 app.include_router(search.router)
 app.include_router(analysis.router)
+app.include_router(clip.router)
+app.include_router(collections.router)
 
 # Serve frontend static files
 if os.path.exists(FRONTEND_DIR):

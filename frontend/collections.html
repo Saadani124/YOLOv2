@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Collections - VOCO v2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="search-style.css">
+    <style>
+        .collections-hero {
+            text-align: center;
+            padding: 4rem 0 2rem;
+        }
+        
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .collection-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .collection-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary);
+        }
+        
+        .collection-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(107, 124, 58, 0.1);
+            color: var(--primary);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .collection-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .collection-count {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .category-title {
+            margin-top: 4rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .category-title::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Video List Overlay */
+        .collection-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            padding: 4rem 2rem;
+        }
+        
+        .overlay-header {
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .close-overlay {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .close-overlay:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e74c3c;
+        }
+        
+        .video-grid-overlay {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .video-card-mini {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .video-card-mini:hover {
+            transform: scale(1.03);
+            border-color: var(--primary);
+        }
+        
+        .card-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            object-fit: cover;
+        }
+        
+        .card-info {
+            padding: 1rem;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .card-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="search.html" class="logo">
+                    <div class="logo-icon">V</div>
+                    <span class="logo-text">VOCO <span style="color: var(--primary); font-weight: 800;">v2</span></span>
+                </a>
+                <nav class="nav">
+                    <a href="search.html" class="nav-link">Search</a>
+                    <a href="advanced-search.html" class="nav-link">Advanced Search</a>
+                    <a href="collections.html" class="nav-link active">Collections</a>
+                    <a href="admin.html" class="nav-link">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="collections-hero">
+                <h1>Smart Collections</h1>
+                <p>Your library automatically organized by content, language, and metadata.</p>
+            </div>
+
+            <div id="collections-container">
+                <!-- Categories and Cards will be injected here -->
+                <div style="text-align: center; padding: 5rem;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">Organizing your library...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Collection Overlay -->
+    <div id="collection-overlay" class="collection-overlay">
+        <div class="overlay-header">
+            <div>
+                <h2 id="overlay-title" style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">Collection Name</h2>
+                <p id="overlay-subtitle" style="color: var(--text-muted);">X videos in this collection</p>
+            </div>
+            <button class="close-overlay" id="close-overlay">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div id="video-grid-overlay" class="video-grid-overlay">
+            <!-- Videos will be injected here -->
+        </div>
+    </div>
+
+    <script src="collections.js"></script>
+</body>
+</html>

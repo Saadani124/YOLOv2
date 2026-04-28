@@ -102,6 +102,14 @@ function renderGlobalResults(data, query) {
                 <div class="match-timestamp">${match.timestamp_formatted}</div>
                 <div class="match-content">
                     <div class="match-text">${highlightedText}</div>
+                    <button class="download-btn" onclick="event.stopPropagation(); downloadClip('${video.video_id}', '${match.timestamp}', '${match.timestamp + 15}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Clip
+                    </button>
                 </div>
                 <div class="match-type-badge">${matchTypeLabel}</div>
                 <div style="color: var(--text-muted);">
@@ -154,4 +162,30 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+async function downloadClip(videoId, start, end) {
+    // Show toast or some indicator
+    // We don't have a toast in advanced-search.html, let's add one or use alert
+    alert("Preparing your clip... please wait.");
+
+    try {
+        const url = `${API_BASE}/api/clip/${videoId}?start=${start}&end=${end}`;
+        const res = await fetch(url);
+        
+        if (!res.ok) throw new Error('Failed to generate clip');
+        
+        const blob = await res.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `clip_${videoId}_${start}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        a.remove();
+    } catch (e) {
+        console.error('Download error', e);
+        alert("Failed to generate clip.");
+    }
 }

@@ -163,3 +163,52 @@ def extract_thumbnail(video_path: str, output_path: str, timestamp: float = 1.0)
     except Exception as e:
         print(f"Failed to extract thumbnail: {e}")
         return False
+
+
+def create_video_clip(input_path: str, output_path: str, start_time: float, end_time: float) -> bool:
+    """
+    Extract a clip from a video using ffmpeg.
+    
+    Args:
+        input_path: Path to the input video file
+        output_path: Path to save the extracted clip
+        start_time: Start time in seconds
+        end_time: End time in seconds
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    if not FFMPEG_PATH:
+        return False
+        
+    duration = end_time - start_time
+    if duration <= 0:
+        return False
+
+    # We use re-encoding (-c:v libx264) to ensure the clip starts and ends precisely
+    # even if the timestamps don't land on keyframes.
+    cmd = [
+        FFMPEG_PATH,
+        "-y",
+        "-ss", str(start_time),
+        "-t", str(duration),
+        "-i", input_path,
+        "-c:v", "libx264",
+        "-preset", "ultrafast",  # Fast encoding
+        "-crf", "23",            # Standard quality
+        "-c:a", "aac",           # Re-encode audio to ensure sync
+        output_path
+    ]
+    
+    try:
+        subprocess.run(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+        )
+        return os.path.exists(output_path)
+    except Exception as e:
+        print(f"Failed to create clip: {e}")
+        return False

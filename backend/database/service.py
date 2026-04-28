@@ -565,3 +565,26 @@ def search_global(db: Session, query: str) -> List[Dict]:
         results_by_video[vid_id]["matches"].sort(key=lambda x: x["timestamp"])
         
     return list(results_by_video.values())
+def get_collection_stats(db: Session) -> Dict:
+    from sqlalchemy import func, distinct
+    languages = db.query(Video.language, func.count(Video.id)).group_by(Video.language).all()
+    lang_stats = [{" value\: l[0], \count\: l[1]} for l in languages if l[0]]
+ objects = db.query(ObjectDetection.object_class, func.count(distinct(ObjectDetection.video_id))).group_by(ObjectDetection.object_class).order_by(func.count(distinct(ObjectDetection.video_id)).desc()).limit(15).all()
+ obj_stats = [{\value\: o[0], \count\: o[1]} for o in objects]
+ ocr = db.query(VisualText.text, func.count(distinct(VisualText.video_id))).group_by(VisualText.text).order_by(func.count(distinct(VisualText.video_id)).desc()).limit(15).all()
+ ocr_stats = [{\value\: t[0], \count\: t[1]} for t in ocr]
+ return {
+ \languages\: lang_stats,
+ \objects\: obj_stats,
+ \visual_text\: ocr_stats
+ }
+
+def get_videos_by_collection(db: Session, category: str, value: str) -> List[Video]:
+ if category == \language\:
+ return db.query(Video).filter(Video.language == value).all()
+ elif category == \object\:
+ return db.query(Video).join(ObjectDetection).filter(ObjectDetection.object_class == value).distinct().all()
+ elif category == \ocr\:
+ return db.query(Video).join(VisualText).filter(VisualText.text == value).distinct().all()
+ return []
+

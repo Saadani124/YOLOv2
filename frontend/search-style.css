@@ -536,3 +536,32 @@ body {
     background: rgba(255, 255, 255, 0.2);
     color: white;
 }
+
+/* Clip Generator */
+.download-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+    font-weight: 600;
+}
+
+.download-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.result-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
