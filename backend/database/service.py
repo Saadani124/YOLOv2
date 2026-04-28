@@ -470,3 +470,98 @@ def visual_text_to_dict(vt: VisualText) -> Dict:
             "height": vt.bbox_height
         } if vt.bbox_x is not None else None
     }
+
+
+def search_global(db: Session, query: str) -> List[Dict]:
+    """
+    Search across all videos for transcripts, objects, and OCR text.
+    
+    Args:
+        db: Database session
+        query: Search query
+        
+    Returns:
+        List of GlobalSearchResult-compatible dictionaries
+    """
+    from sqlalchemy import or_
+    
+    query_clean = query.strip().lower()
+    if not query_clean:
+        return []
+        
+    results_by_video = {}
+    
+    # 1. Search Transcripts
+    segments = db.query(Segment, Video).join(Video, Segment.video_id == Video.video_id).filter(
+        Segment.text.like(f"%{query_clean}%")
+    ).all()
+    
+    for seg, vid in segments:
+        if vid.video_id not in results_by_video:
+            results_by_video[vid.video_id] = {
+                "video_id": vid.video_id,
+                "video_name": vid.original_name,
+                "duration": vid.duration,
+                "language": vid.language,
+                "matches": []
+            }
+        
+        results_by_video[vid.video_id]["matches"].append({
+            "timestamp": seg.start_time,
+            "timestamp_formatted": format_time(seg.start_time),
+            "text": seg.text,
+            "match_type": "transcript",
+            "score": 100.0  # Simple score for now
+        })
+        
+    # 2. Search Objects
+    objects = db.query(ObjectDetection, Video).join(Video, ObjectDetection.video_id == Video.video_id).filter(
+        ObjectDetection.object_class.like(f"%{query_clean}%")
+    ).all()
+    
+    for obj, vid in objects:
+        if vid.video_id not in results_by_video:
+            results_by_video[vid.video_id] = {
+                "video_id": vid.video_id,
+                "video_name": vid.original_name,
+                "duration": vid.duration,
+                "language": vid.language,
+                "matches": []
+            }
+            
+        results_by_video[vid.video_id]["matches"].append({
+            "timestamp": obj.timestamp,
+            "timestamp_formatted": format_time(obj.timestamp),
+            "text": f"Detected object: {obj.object_class}",
+            "match_type": "object",
+            "score": obj.confidence * 100.0
+        })
+        
+    # 3. Search Visual Text (OCR)
+    vtexts = db.query(VisualText, Video).join(Video, VisualText.video_id == Video.video_id).filter(
+        VisualText.text.like(f"%{query_clean}%")
+    ).all()
+    
+    for vt, vid in vtexts:
+        if vid.video_id not in results_by_video:
+            results_by_video[vid.video_id] = {
+                "video_id": vid.video_id,
+                "video_name": vid.original_name,
+                "duration": vid.duration,
+                "language": vid.language,
+                "matches": []
+            }
+            
+        results_by_video[vid.video_id]["matches"].append({
+            "timestamp": vt.timestamp,
+            "timestamp_formatted": format_time(vt.timestamp),
+            "text": f"Visual text: {vt.text}",
+            "match_type": "ocr",
+            "score": vt.confidence * 100.0
+        })
+        
+    # Sort matches within each video by timestamp
+    for vid_id in results_by_video:
+        results_by_video[vid_id]["matches"].sort(key=lambda x: x["timestamp"])
+        
+    return list(results_by_video.values())

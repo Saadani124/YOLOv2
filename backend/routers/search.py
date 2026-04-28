@@ -5,9 +5,9 @@ from database.service import (
     get_video, get_segments_for_video, segment_to_dict, 
     log_search, get_popular_searches, get_detections_for_video,
     detection_to_dict, update_search_history_for_objects,
-    get_visual_texts_for_video
+    get_visual_texts_for_video, search_global
 )
-from database.models import SearchRequest
+from database.models import SearchRequest, GlobalSearchRequest, GlobalSearchResponse
 from services.search import search_transcription
 from services.object_detection import search_objects
 from core.utils import format_time
@@ -135,3 +135,26 @@ async def search_visual_text_endpoint(
 async def get_search_suggestions_endpoint(video_id: str, db: Session = Depends(get_db)):
     suggestions = get_popular_searches(db, video_id, limit=10)
     return {"video_id": video_id, "suggestions": suggestions}
+
+
+@router.post("/search/global", response_model=GlobalSearchResponse)
+async def global_search_endpoint(
+    request: GlobalSearchRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Search across all videos and group results.
+    """
+    query = request.query.strip()
+    if not query:
+        return {"query": "", "total_matches": 0, "video_results": []}
+        
+    video_results = search_global(db, query)
+    
+    total_matches = sum(len(v["matches"]) for v in video_results)
+    
+    return {
+        "query": query,
+        "total_matches": total_matches,
+        "video_results": video_results
+    }

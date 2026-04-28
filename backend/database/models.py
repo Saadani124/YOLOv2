@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class WordTimestamp(BaseModel):
-    """Individual word with timestamp"""
     word: str
     start: float
     end: float
@@ -13,7 +12,6 @@ class WordTimestamp(BaseModel):
 
 
 class TranscriptSegment(BaseModel):
-    """Transcript segment with word-level detail"""
     id: int
     start: float
     end: float
@@ -24,7 +22,6 @@ class TranscriptSegment(BaseModel):
 
 
 class VideoTranscription(BaseModel):
-    """Complete video transcription data"""
     segments: List[TranscriptSegment]
     full_text: str
     language: str
@@ -34,13 +31,11 @@ class VideoTranscription(BaseModel):
 
 
 class SearchRequest(BaseModel):
-    """Search request model"""
     video_id: str
     query: str
 
 
 class SearchMatch(BaseModel):
-    """Individual search result match"""
     segment_id: int
     start: float
     end: float
@@ -54,18 +49,43 @@ class SearchMatch(BaseModel):
 
 
 class SearchResponse(BaseModel):
-    """Search response model"""
     query: str
     result_count: int
     results: List[SearchMatch]
     full_text: str
 
 
+class GlobalSearchRequest(BaseModel):
+    """Global search request model"""
+    query: str
+
+
+class GlobalSearchMatch(BaseModel):
+    timestamp: float
+    timestamp_formatted: str
+    text: str
+    match_type: str  # "transcript", "object", "ocr"
+    score: float
+
+
+class GlobalSearchResult(BaseModel):
+    video_id: str
+    video_name: str
+    duration: float
+    language: str
+    matches: List[GlobalSearchMatch]
+
+
+class GlobalSearchResponse(BaseModel):
+    query: str
+    total_matches: int
+    video_results: List[GlobalSearchResult]
+
+
 transcriptions: Dict[str, VideoTranscription] = {}
 
 #tahdhir ll BD
 def store_transcription(video_id: str, data: VideoTranscription):
-    """Store a transcription"""
     transcriptions[video_id] = data
 
 

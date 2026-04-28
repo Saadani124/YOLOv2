@@ -146,17 +146,18 @@ async function loadVideoList() {
             videoDropdown.appendChild(opt);
         });
         
-        // Handle URL param if exists
+        // Handle URL params if exist
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get('id');
-        if (id) switchVideo(id);
+        const time = urlParams.get('t');
+        if (id) switchVideo(id, time);
 
     } catch (e) {
         console.error('Failed to load videos', e);
     }
 }
 
-async function switchVideo(id) {
+async function switchVideo(id, startTime = null) {
     currentId = id;
     const video = videos.find(v => v.video_id === id);
     if (!video) {
@@ -165,19 +166,29 @@ async function switchVideo(id) {
             const data = await res.json();
             videos = data.videos;
             const v2 = videos.find(v => v.video_id === id);
-            if (v2) updateUIWithVideo(v2);
+            if (v2) updateUIWithVideo(v2, startTime);
         } catch (e) {}
     } else {
-        updateUIWithVideo(video);
+        updateUIWithVideo(video, startTime);
     }
 }
 
-function updateUIWithVideo(video) {
+function updateUIWithVideo(video, startTime = null) {
     currentVideoName.textContent = video.original_name;
     videoPlayer.src = `${API_BASE}/api/video/${video.video_id}`;
     selectionView.classList.add('hidden');
     searchView.classList.remove('hidden');
     
+    // Jump to start time if provided
+    if (startTime) {
+        const jumpToTime = () => {
+            videoPlayer.currentTime = parseFloat(startTime);
+            videoPlayer.play();
+            videoPlayer.removeEventListener('loadedmetadata', jumpToTime);
+        };
+        videoPlayer.addEventListener('loadedmetadata', jumpToTime);
+    }
+
     // Reset Transcript
     fullTranscriptData = null;
     fullTranscriptContent.innerHTML = '<div class="transcript-loading">Loading transcript...</div>';
