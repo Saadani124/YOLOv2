@@ -24,11 +24,27 @@ def init_detection_model():
         return None
     
     try:
+        import torch
         from ultralytics import YOLO
         
         print(f"Loading object detection model: {OBJECT_DETECTION_MODEL} on device: {DEVICE}")
-        _detection_model = YOLO(OBJECT_DETECTION_MODEL)
-        _detection_model.to(DEVICE)
+        
+        # PyTorch 2.6+ security fix: Automatically handle the new weights_only=True default
+        # which blocks unpickling custom classes from ultralytics
+        original_load = torch.load
+        def patched_load(*args, **kwargs):
+            if 'weights_only' not in kwargs:
+                kwargs['weights_only'] = False
+            return original_load(*args, **kwargs)
+        
+        torch.load = patched_load
+        try:
+            _detection_model = YOLO(OBJECT_DETECTION_MODEL)
+            _detection_model.to(DEVICE)
+        finally:
+            # Restore original torch.load to avoid side effects elsewhere
+            torch.load = original_load
+            
         print("✓ Object detection model loaded successfully!")
         
         return _detection_model
@@ -38,6 +54,9 @@ def init_detection_model():
         return None
     except Exception as e:
         print(f"⚠️  Error loading detection model: {e}")
+        # Provide helpful hint for PyTorch 2.6 users if they still hit it
+        if "weights_only" in str(e) or "WeightsUnpickler" in str(e):
+            print("💡 Hint: This appears to be a PyTorch 2.6 security restriction. Ensure 'ultralytics' is up to date (pip install -U ultralytics).")
         return None
 
 
