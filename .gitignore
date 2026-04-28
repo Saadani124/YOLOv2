@@ -1,0 +1,32 @@
+# --- Python Specific ---
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Environment Variables ---
+# Never commit your secrets!
+.env
+.env.local
+.env.*
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+
+# --- Project Specific (Optional) ---
+# If you are downloading YOLO models automatically
+*.pt
+*.weights
+
+# Large data/video files
+*.mp4
+*.avi
+*.mkv

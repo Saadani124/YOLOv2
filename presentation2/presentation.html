@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOCO v2 — AI Video Indexing System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="presentation.css">
+</head>
+<body>
+<div id="cd"></div>
+<div id="cr"></div>
+<canvas id="bg"></canvas>
+<div id="noise"></div>
+
+<header id="top">
+  <div class="logo">VOCO v2</div>
+  <div class="slide-counter"><em id="cur">01</em> / <span id="tot">10</span></div>
+</header>
+
+<main id="deck">
+
+  <section class="slide on" data-i="0">
+    <div class="inner">
+      <div class="hero-grid stg">
+        <div>
+          <div class="hero-kicker">Système d'Indexation Vidéo par IA</div>
+          <h1 class="h1">VOCO<br><span class="gradient-text">v2</span></h1>
+          <p class="lead" style="margin-top:1.2rem">Pipeline asynchrone 4 phases — extraction de métadonnées profondes, transcription, détection d'objets et OCR combinés.</p>
+          <div class="hero-pills">
+            <span class="pill">Whisper</span><span class="pill">YOLOv12n</span><span class="pill">EasyOCR</span><span class="pill">FastAPI</span><span class="pill">SQLAlchemy</span><span class="pill">RapidFuzz</span>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hstat"><div class="n">O(1)</div><div class="l">Search Complexity</div></div>
+          <div class="hdiv"></div>
+          <div class="hstat"><div class="n">3</div><div class="l">AI Models</div></div>
+          <div class="hdiv"></div>
+          <div class="hstat"><div class="n">100+</div><div class="l">Languages</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="1">
+    <div class="inner">
+      <div class="hero-grid stg">
+        <div>
+          <div class="hero-kicker">Présentation Générale</div>
+          <h2 class="h2">Equipe & Mission</h2>
+          <p class="lead" style="margin-top:1.2rem">VOCO v2 est une plateforme d'indexation vidéo IA conçue pour rendre les contenus multimédias entièrement recherchables, rapides et sûrs.</p>
+          <div class="hero-copy" style="margin-top:1rem;max-width:34rem;font-size:1rem;line-height:1.8;color:rgba(255,255,255,.82);">
+            Projet réalisé par <strong>Med Adem Hattay</strong> et <strong>Talel Saadani</strong>, deux étudiants en IA qui réinventent l’analyse vidéo en combinant vision, transcription et recherche sémantique.
+          </div>
+          <div class="hero-pills" style="margin-top:1.8rem">
+            <span class="pill">Med Adem Hattay</span><span class="pill">Talel Saadani</span><span class="pill">Vision IA</span><span class="pill">3D Créatif</span>
+          </div>
+        </div>
+        <div class="project-3d-card">
+          <div class="project-3d-ring"></div>
+          <div class="project-3d-inner">
+            <div class="cube-face face-front">VOCO</div>
+            <div class="cube-face face-right">v2</div>
+            <div class="cube-face face-top">AI</div>
+          </div>
+          <div class="project-3d-meta">
+            <div class="project-meta-title">Med Adem Hattay &amp; Talel Saadani</div>
+            <div class="project-meta-sub">Animation 3D, branding futuriste et concept d’IA immersif</div>
+          </div>
+          <div class="project-highlights">
+            <div class="highlight">🚀 Performance en temps réel</div>
+            <div class="highlight">🎯 Recherche multimodale</div>
+            <div class="highlight">🔒 Confidentialité locale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="2">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Vue d'ensemble</div>
+        <h2 class="h2">Au programme<br>de cette présentation</h2>
+      </div>
+      <div class="toc-grid stg">
+        <div class="toc-card c1"><div class="toc-n">01</div><div class="toc-t">Pipeline de Traitement</div><div class="toc-d">4 phases asynchrones — de l'upload à la recherche multi-modale</div></div>
+        <div class="toc-card c7"><div class="toc-n">02</div><div class="toc-t">Présentation Projet</div><div class="toc-d">Equipe, mission et animation 3D immersive du projet</div></div>
+        <div class="toc-card c2"><div class="toc-n">03</div><div class="toc-t">Modèles IA</div><div class="toc-d">Whisper, YOLOv12n, EasyOCR — sélection, config, benchmarks</div></div>
+        <div class="toc-card c3"><div class="toc-n">04</div><div class="toc-t">Comparaison Tech</div><div class="toc-d">Nos choix vs les alternatives du marché — pourquoi</div></div>
+        <div class="toc-card c4"><div class="toc-n">05</div><div class="toc-t">Fonctionnalités</div><div class="toc-d">Recherche multi-modale, timeline O(1), support 100+ langues</div></div>
+        <div class="toc-card c5"><div class="toc-n">06</div><div class="toc-t">Performance</div><div class="toc-d">Métriques clés, benchmarks, paramètres d'optimisation</div></div>
+        <div class="toc-card c6"><div class="toc-n">07</div><div class="toc-t">Architecture & Stack</div><div class="toc-d">FastAPI, SQLAlchemy, PyTorch, FFMPEG — les 4 piliers</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="3">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Processing Pipeline</div>
+        <h2 class="h2">4 phases.<br>Zéro blocage serveur.</h2>
+        <p class="lead" style="margin-top:.7rem">Flux asynchrone strict — aucun thread bloquant, le serveur reste disponible pendant tout le traitement IA.</p>
+      </div>
+      <div class="pipe-grid stg">
+        <div class="phase" data-n="01">
+          <div class="ph-ey">Phase 01</div>
+          <div class="ph-nm">Ingestion</div>
+          <ul class="ph-ul">
+            <li>Upload <code style="font-size:.75em;color:var(--cyan)">/api/upload</code> avec UUID unique</li>
+            <li>FFMPEG — métadonnées + thumbnail au midpoint</li>
+            <li>Flux SSE enregistré pour suivi temps réel</li>
+          </ul>
+        </div>
+        <div class="phase" data-n="02">
+          <div class="ph-ey">Phase 02</div>
+          <div class="ph-nm">AI Processing</div>
+          <ul class="ph-ul">
+            <li>Whisper transcrit l'audio, horodatage mot/mot</li>
+            <li>YOLO détecte objets à 1fps, bounding boxes</li>
+            <li>EasyOCR extrait texte visuel des frames</li>
+          </ul>
+        </div>
+        <div class="phase" data-n="03">
+          <div class="ph-ey">Phase 03</div>
+          <div class="ph-nm">Stockage</div>
+          <ul class="ph-ul">
+            <li>SQLAlchemy ORM — MySQL ou SQLite</li>
+            <li>Video → Segments → Words → Objects → VisualText</li>
+            <li>Événement 100% déverrouille la vidéo</li>
+          </ul>
+        </div>
+        <div class="phase" data-n="04">
+          <div class="ph-ey">Phase 04</div>
+          <div class="ph-nm">Recherche</div>
+          <ul class="ph-ul">
+            <li>RapidFuzz — fautes de frappe tolérées</li>
+            <li>Index HashMap O(1) → timeline instantanée</li>
+            <li>Multi-modal : transcriptions, objets, OCR</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="4">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Modèles d'Intelligence Artificielle</div>
+        <h2 class="h2">Trois couches.<br>Un seul worker.</h2>
+      </div>
+      <div class="models-grid stg">
+        <div class="mc w">
+          <span class="mc-ico">🎙️</span>
+          <div class="mc-name">OpenAI Whisper</div>
+          <div class="mc-type">Audio Transcription</div>
+          <p class="mc-body">Isole la piste audio du conteneur vidéo. Génère des horodatages exacts au niveau du mot — navigation temporelle précise à la seconde.</p>
+          <div class="mc-stats">
+            <div><div class="ms-val">~100</div><div class="ms-lbl">Langues</div></div>
+            <div><div class="ms-val">6-8%</div><div class="ms-lbl">Error Rate</div></div>
+          </div>
+        </div>
+        <div class="mc y">
+          <span class="mc-ico">👁️</span>
+          <div class="mc-name">YOLOv12n</div>
+          <div class="mc-type">Object Detection</div>
+          <p class="mc-body">Échantillonne à 1fps, conf=0.45, FP16 half-precision. 80+ classes COCO. 50% d'économie VRAM avec précision quasi-identique.</p>
+          <div class="mc-stats">
+            <div><div class="ms-val">80+</div><div class="ms-lbl">Classes COCO</div></div>
+            <div><div class="ms-val">2×</div><div class="ms-lbl">vs YOLOv8</div></div>
+          </div>
+        </div>
+        <div class="mc o">
+          <span class="mc-ico">📄</span>
+          <div class="mc-name">EasyOCR</div>
+          <div class="mc-type">Visual Text Recognition</div>
+          <p class="mc-body">Extrait tout texte visible — panneaux, slides, affiches. GPU partagé avec YOLO. Filtrage de confiance à 0.3 pour éviter le bruit.</p>
+          <div class="mc-stats">
+            <div><div class="ms-val">1fps</div><div class="ms-lbl">Optimal Rate</div></div>
+            <div><div class="ms-val">0.3</div><div class="ms-lbl">Conf Seuil</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="5">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Comparaison IA</div>
+        <h2 class="h2">Notre stack IA<br>contre les alternatives.</h2>
+      </div>
+      <div class="cmp-grid stg">
+        <div class="cmp-col">
+          <div class="cmp-hd g">👁 Computer Vision</div>
+          <div class="cmp-row">
+            <div class="cmp-t"><span class="ct-badge u">Utilisé</span><div class="ct-nm">YOLOv12n</div><div class="ct-spec">Optimisé pour vitesse</div><div class="ct-spec">FP16 / VRAM réduite</div><div class="ct-spec">Meilleur pour edge et local</div></div>
+            <div class="cmp-t"><span class="ct-badge a">Alternative</span><div class="ct-nm">YOLOv8</div><div class="ct-spec">Modèle plus lourd</div><div class="ct-spec">FP32 standard</div><div class="ct-spec">Plus de coût / VRAM</div></div>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-hd y">🗣 NLP / ASR</div>
+          <div class="cmp-row">
+            <div class="cmp-t"><span class="ct-badge u">Utilisé</span><div class="ct-nm">OpenAI Whisper</div><div class="ct-spec">Local / offline</div><div class="ct-spec">Word timestamps</div><div class="ct-spec">Contrôle complet</div></div>
+            <div class="cmp-t"><span class="ct-badge a">Alternative</span><div class="ct-nm">Google Speech-to-Text</div><div class="ct-spec">Cloud dépendant</div><div class="ct-spec">API payante</div><div class="ct-spec">Moins de confidentialité</div></div>
+          </div>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-hd r">📝 OCR</div>
+          <div class="cmp-row">
+            <div class="cmp-t"><span class="ct-badge u">Utilisé</span><div class="ct-nm">EasyOCR</div><div class="ct-spec">Open source</div><div class="ct-spec">GPU accéléré</div><div class="ct-spec">Local et maîtrisable</div></div>
+            <div class="cmp-t"><span class="ct-badge a">Alternative</span><div class="ct-nm">Google Vision OCR</div><div class="ct-spec">Cloud API</div><div class="ct-spec">Coût à l'usage</div><div class="ct-spec">Dépendance externe</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="reasons stg">
+        <div class="rsn"><div class="rsn-ico">⚡</div><div class="rsn-t"><strong>Performance</strong>Latence plus faible, exécution locale, rapidité maximum.</div></div>
+        <div class="rsn"><div class="rsn-ico">🔧</div><div class="rsn-t"><strong>Contrôle</strong>Configuration, pipeline et données 100% maîtrisés.</div></div>
+        <div class="rsn"><div class="rsn-ico">💰</div><div class="rsn-t"><strong>Coût</strong>Open source et on-premise vs facturation cloud par requête.</div></div>
+        <div class="rsn"><div class="rsn-ico">🔒</div><div class="rsn-t"><strong>Confidentialité</strong>Données traitées en local sans envoi externe.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="6">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Fonctionnalités</div>
+        <h2 class="h2">Ce que VOCO v2<br>rend possible.</h2>
+      </div>
+      <div class="feat-grid stg">
+        <div class="fc"><div class="fc-ico c">⚡</div><div class="fc-body"><h4>Traitement Ultra-Rapide</h4><p>Pipeline 4 phases optimisé — indexation complète en quelques minutes, modèles IA accélérés GPU.</p></div></div>
+        <div class="fc"><div class="fc-ico g">🔍</div><div class="fc-body"><h4>Recherche Multi-Modale</h4><p>Recherche simultanée sur transcriptions audio, objets détectés et texte visuel OCR.</p></div></div>
+        <div class="fc"><div class="fc-ico r">📊</div><div class="fc-body"><h4>Timeline O(1)</h4><p>Index HashMap — navigation instantanée vers n'importe quelle seconde de la vidéo, sans latence.</p></div></div>
+        <div class="fc"><div class="fc-ico m">🌐</div><div class="fc-body"><h4>Support Multilingue</h4><p>Transcription et OCR en 100+ langues avec précision native. Modèle base configurable via env.</p></div></div>
+        <div class="fc"><div class="fc-ico c">🔄</div><div class="fc-body"><h4>Traitement Asynchrone</h4><p>Upload et traitement en arrière-plan avec suivi SSE temps réel — zéro blocage serveur.</p></div></div>
+        <div class="fc"><div class="fc-ico g">🛡️</div><div class="fc-body"><h4>Architecture Modulaire</h4><p>6 services découplés, swap SQLite ↔ MySQL sans toucher au code, gestion d'erreurs robuste.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="7">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Métriques de Performance</div>
+        <h2 class="h2">Conçu pour<br>la vitesse.</h2>
+      </div>
+      <div class="perf-cells stg">
+        <div class="pcell"><div class="pnum">O(1)</div><div class="plbl">Complexité de recherche<br>HashMap → mapping instantané</div></div>
+        <div class="pcell"><div class="pnum">50%</div><div class="plbl">Économie VRAM<br>Half-precision FP16 mode</div></div>
+        <div class="pcell"><div class="pnum">2×</div><div class="plbl">Gain vitesse CPU<br>YOLOv12n vs YOLOv8</div></div>
+      </div>
+      <div class="bench-row stg">
+        <div class="bi"><div class="bdot"></div><div class="bt"><strong>Indexation</strong>&lt; 5 min / vidéo</div></div>
+        <div class="bi"><div class="bdot" style="background:var(--gold)"></div><div class="bt"><strong>GPU VRAM</strong>8 GB minimum</div></div>
+        <div class="bi"><div class="bdot" style="background:var(--coral)"></div><div class="bt"><strong>Scan rate</strong>1fps optimal (10fps max)</div></div>
+        <div class="bi"><div class="bdot" style="background:var(--mint)"></div><div class="bt"><strong>Modèles</strong>3 IA en pipeline séquentiel</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="8">
+    <div class="inner">
+      <div class="stg" style="margin-bottom: 0.8rem;">
+        <div class="eyebrow">Architecture Backend</div>
+        <h2 class="h2" style="font-size: 2.3rem;">Infrastructure Modulaire</h2>
+      </div>
+      <div class="arch-grid stg">
+        <div class="arch-mods">
+          <div class="amod">
+            <div class="amod-hd"><div class="adot c"></div><div class="amod-nm">📁 routers/</div></div>
+            <div class="amod-bd">
+              <div class="af"><span>video.py</span> — uploads & streams</div>
+              <div class="af"><span>search.py</span> — sémantique</div>
+            </div>
+          </div>
+          <div class="amod">
+            <div class="amod-hd"><div class="adot g"></div><div class="amod-nm">⚙️ services/</div></div>
+            <div class="amod-bd">
+              <div class="af"><span>transcription.py</span> — Whisper</div>
+              <div class="af"><span>object_detection.py</span> — YOLO</div>
+              <div class="af"><span>ocr.py</span> — EasyOCR</div>
+            </div>
+          </div>
+          <div class="amod">
+            <div class="amod-hd"><div class="adot r"></div><div class="amod-nm">🗄️ database/</div></div>
+            <div class="amod-bd">
+              <div class="af"><span>core.py</span> — moteur SQLAlchemy</div>
+              <div class="af"><span>service.py</span> — CRUD ops</div>
+            </div>
+          </div>
+          <div class="amod">
+            <div class="amod-hd"><div class="adot m"></div><div class="amod-nm">🧠 tasks/ & core/</div></div>
+            <div class="amod-bd">
+              <div class="af"><span>background.py</span> — orchestrateur</div>
+              <div class="af"><span>config.py</span> — environnement</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="cview">
+          <div class="cview-hd">
+            <div class="cdots"><span></span><span></span><span></span></div>
+            <div class="cfn">tasks/background.py</div>
+          </div>
+          <div class="cview-body">
+            <span class="cmt"># Orchestrateur — Pipeline Asynchrone</span>
+            <span class="kw">async def</span> <span class="fn">process_video</span>(video_id: <span class="nm">str</span>):
+              video = <span class="kw">await</span> db.get_video(video_id)
+              
+              <span class="cmt"># Phase 1: Extraction Audio</span>
+              audio = <span class="kw">await</span> ffmpeg.extract_audio(video.path)
+
+              <span class="cmt"># Phase 2: Analyse IA Parallèle</span>
+              tasks = [
+                transcription.run(audio),
+                object_detection.run(video.path),
+                ocr.run(video.path)
+              ]
+              
+              <span class="cmt"># Exécution simultanée (Multi-Model)</span>
+              res = <span class="kw">await</span> asyncio.gather(*tasks)
+              segments, objects, visual = res
+
+              <span class="cmt"># Phase 3: Persistance Indexée</span>
+              <span class="kw">await</span> db.save_all(segments, objects, visual)
+              search.build_index(video_id)
+              
+              progress.complete(video_id) <span class="cmt"># Déverrouillage</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="slide" data-i="9">
+    <div class="inner">
+      <div class="stg">
+        <div class="eyebrow">Stack Technologique</div>
+        <h2 class="h2">Les 4 piliers<br>de l'infrastructure.</h2>
+      </div>
+      <div class="stack-grid stg">
+        <div class="sc s1"><span class="sc-ico">⚡</span><div class="sc-name">FastAPI</div><div class="sc-role">Backbone Async</div><p class="sc-desc">Native async/await pour les tâches IA longues et flux SSE simultanés sans aucun blocage serveur.</p></div>
+        <div class="sc s2"><span class="sc-ico">🗄️</span><div class="sc-name">SQLAlchemy</div><div class="sc-role">ORM</div><p class="sc-desc">Abstraction SQL en Python. Switch SQLite ↔ MySQL via DATABASE_URL sans modifier une ligne de code.</p></div>
+        <div class="sc s3"><span class="sc-ico">🔥</span><div class="sc-name">PyTorch</div><div class="sc-role">Deep Learning</div><p class="sc-desc">Framework tensoriel pour Whisper et YOLO. Gère l'allocation mémoire CUDA et la parallélisation GPU.</p></div>
+        <div class="sc s4"><span class="sc-ico">🎬</span><div class="sc-name">FFMPEG</div><div class="sc-role">Multimédia</div><p class="sc-desc">Extraction audio pour Whisper, frames précises pour YOLO et EasyOCR. Standard industrie multimédia.</p></div>
+      </div>
+      <div class="bench-row stg" style="margin-top:1.8rem">
+        <div class="bi"><div class="bdot"></div><div class="bt"><strong>Python 3.9+</strong>Runtime</div></div>
+        <div class="bi"><div class="bdot" style="background:var(--gold)"></div><div class="bt"><strong>CUDA 11.8+</strong>GPU Accélération</div></div>
+        <div class="bi"><div class="bdot" style="background:var(--coral)"></div><div class="bt"><strong>FFmpeg 4.4+</strong>Media Processing</div></div>
+        <div class="bi"><div class="bdot" style="background:var(--mint)"></div><div class="bt"><strong>Docker Ready</strong>Déploiement</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-i="10">
+    <div class="inner">
+      <div class="close-wrap stg">
+        <div class="eyebrow" style="justify-content:center;margin-bottom:1.3rem">VOCO v2 — Synthèse finale</div>
+        <h2 class="close-h">De l'upload<br>à l'insight<br><span class="gradient-text">en secondes.</span></h2>
+        <p class="close-sub">Architecture modulaire, pipeline 4 phases, 3 modèles IA — conçu pour la scalabilité, optimisé pour la vitesse, prêt pour la production.</p>
+        <div class="close-stats">
+          <div class="cst"><div class="n">O(1)</div><div class="l">Search Complexity</div></div>
+          <div class="cst"><div class="n">100+</div><div class="l">Languages</div></div>
+          <div class="cst"><div class="n">50%</div><div class="l">VRAM Savings</div></div>
+        </div>
+        <div class="close-pills">
+          <span class="pill">WHISPER</span><span class="pill">YOLO</span><span class="pill">EASYOCR</span><span class="pill">FASTAPI</span><span class="pill">SQLALCHEMY</span><span class="pill">PYTORCH</span><span class="pill">FFMPEG</span><span class="pill">RAPIDFUZZ</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="bot">
+  <button class="nav-btn" id="bp" disabled>‹</button>
+  <div class="bar"><div class="bar-fill" id="bf" style="width:10%"></div></div>
+  <div class="dots" id="dots"></div>
+  <div class="bar" style="max-width:80px"><div class="bar-fill" id="bf2" style="width:10%"></div></div>
+  <button class="nav-btn" id="bn">›</button>
+  <div class="kbhint"><kbd>←</kbd><kbd>→</kbd> naviger &nbsp;<kbd>Space</kbd> suivant</div>
+</footer>
+
+<script>
+/* WebGL Particles */
+(function(){
+  const c=document.getElementById('bg');
+  const gl=c.getContext('webgl');
+  if(!gl)return;
+  let W,H;
+  function rsz(){W=c.width=innerWidth;H=c.height=innerHeight;gl.viewport(0,0,W,H)}
+  rsz();addEventListener('resize',rsz);
+  const vs=`attribute vec2 p;attribute float s;attribute float a;uniform vec2 r;varying float va;void main(){vec2 cl=(p/r)*2.-1.;gl_Position=vec4(cl.x,-cl.y,0,1);gl_PointSize=s;va=a;}`;
+  const fs=`precision mediump float;varying float va;uniform vec3 col;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.3,d)*va;gl_FragColor=vec4(col,a);}`;
+  function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s}
+  const pr=gl.createProgram();
+  gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));
+  gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(pr);gl.useProgram(pr);
+  const ap=gl.getAttribLocation(pr,'p'),as=gl.getAttribLocation(pr,'s'),aa=gl.getAttribLocation(pr,'a');
+  const ur=gl.getUniformLocation(pr,'r'),uc=gl.getUniformLocation(pr,'col');
+  const N=70;
+  const px=new Float32Array(N),py=new Float32Array(N),vx=new Float32Array(N),vy=new Float32Array(N),ps=new Float32Array(N),pa=new Float32Array(N);
+  for(let i=0;i<N;i++){px[i]=Math.random()*innerWidth;py[i]=Math.random()*innerHeight;vx[i]=(Math.random()-.5)*.25;vy[i]=(Math.random()-.5)*.25;ps[i]=1+Math.random()*2;pa[i]=.15+Math.random()*.35}
+  const pb=gl.createBuffer(),sb=gl.createBuffer(),ab=gl.createBuffer();
+  const pd=new Float32Array(N*2);
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+  function frame(){
+    for(let i=0;i<N;i++){px[i]+=vx[i];py[i]+=vy[i];if(px[i]<0)px[i]=W;if(px[i]>W)px[i]=0;if(py[i]<0)py[i]=H;if(py[i]>H)py[i]=0;pd[i*2]=px[i];pd[i*2+1]=py[i]}
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(ur,W,H);gl.uniform3f(uc,0,.78,1);
+    gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,pd,gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,sb);gl.bufferData(gl.ARRAY_BUFFER,ps,gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(as);gl.vertexAttribPointer(as,1,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,ab);gl.bufferData(gl.ARRAY_BUFFER,pa,gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(aa);gl.vertexAttribPointer(aa,1,gl.FLOAT,false,0,0);
+    gl.drawArrays(gl.POINTS,0,N);requestAnimationFrame(frame)
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* Cursor */
+(function(){
+  const d=document.getElementById('cd'),r=document.getElementById('cr');
+  let rx=0,ry=0,mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;d.style.left=mx+'px';d.style.top=my+'px'});
+  function lp(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;r.style.left=rx+'px';r.style.top=ry+'px';requestAnimationFrame(lp)}lp();
+})();
+
+/* Slide Engine */
+(function(){
+  const slides=Array.from(document.querySelectorAll('.slide'));
+  const N=slides.length;
+  document.getElementById('tot').textContent=String(N).padStart(2,'0');
+  const dotsEl=document.getElementById('dots');
+  const bf=document.getElementById('bf'),bf2=document.getElementById('bf2');
+  const bp=document.getElementById('bp'),bn=document.getElementById('bn');
+  const cur=document.getElementById('cur');
+
+  slides.forEach((_,i)=>{
+    const b=document.createElement('button');
+    b.className='dot'+(i===0?' on':'');
+    b.addEventListener('click',()=>go(i));
+    dotsEl.appendChild(b);
+  });
+
+  let c=0,anim=false;
+
+  function go(n){
+    if(n===c||anim||n<0||n>=N)return;
+    anim=true;
+    const p=c;c=n;
+    slides[p].classList.remove('on');
+    slides[p].classList.add('out');
+    setTimeout(()=>slides[p].classList.remove('out'),700);
+    slides[c].classList.add('on');
+    const pct=((c+1)/N*100).toFixed(1)+'%';
+    bf.style.width=bf2.style.width=pct;
+    cur.textContent=String(c+1).padStart(2,'0');
+    document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===c));
+    bp.disabled=c===0;bn.disabled=c===N-1;
+    setTimeout(()=>anim=false,700);
+  }
+
+  bp.addEventListener('click',()=>go(c-1));
+  bn.addEventListener('click',()=>go(c+1));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(c-1);
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')go(c+1);
+    if(e.key===' '){e.preventDefault();go(c+1)}
+    if(e.key==='Home')go(0);
+    if(e.key==='End')go(N-1);
+  });
+  let tx=0;
+  document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(dx<0?c+1:c-1)},{passive:true});
+  let wt=0;
+  document.addEventListener('wheel',e=>{e.preventDefault();const now=Date.now();if(now-wt<800)return;wt=now;go(e.deltaY>0?c+1:c-1)},{passive:false});
+})();
+</script>
+</body>
+</html>

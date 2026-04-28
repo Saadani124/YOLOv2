@@ -1,0 +1,26 @@
+# --- Core Framework ---
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart
+python-dotenv
+python-dateutil
+
+# --- Database ---
+sqlalchemy>=2.0.0
+pymysql
+
+# --- AI & Machine Learning ---
+torch>=2.1.0
+torchvision
+torchaudio
+numpy<2.0.0
+openai-whisper
+ultralytics>=8.0.0
+
+# --- Utilities ---
+ffmpeg-python
+scipy
+pillow
+tqdm
+PyYAML
+watchfiles
