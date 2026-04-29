@@ -1,7 +1,3 @@
-"""
-Configuration settings for ScanVD
-Contains all app constants and environment configuration
-"""
 import os
 import torch
 from dotenv import load_dotenv

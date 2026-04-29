@@ -4,7 +4,7 @@ import shutil
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from database.core import get_db
+from database.core import get_db, get_db_session
 from database.service import get_video, get_all_videos, delete_video
 from config import UPLOAD_DIR, ALLOWED_VIDEO_EXTENSIONS
 from core.utils import get_file_extension
@@ -54,11 +54,18 @@ async def upload_video_endpoint(
     }
 
 @router.get("/video/{video_id}")
-async def get_video_stream(video_id: str, db: Session = Depends(get_db)):
-    video = get_video(db, video_id)
-    if not video or not os.path.exists(video.file_path):
-        raise HTTPException(status_code=404, detail="Video file not found.")
-    return FileResponse(video.file_path, media_type="video/mp4", headers={"Accept-Ranges": "bytes"})
+async def get_video_stream(video_id: str):
+    # Use a short-lived session so the DB connection is released
+    # before the (potentially long) file streaming begins
+    db = get_db_session()
+    try:
+        video = get_video(db, video_id)
+        if not video or not os.path.exists(video.file_path):
+            raise HTTPException(status_code=404, detail="Video file not found.")
+        file_path = video.file_path
+    finally:
+        db.close()
+    return FileResponse(file_path, media_type="video/mp4", headers={"Accept-Ranges": "bytes"})
 
 @router.get("/thumbnail/{video_id}")
 async def get_video_thumbnail(video_id: str):

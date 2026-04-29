@@ -57,7 +57,7 @@ def fuzzy_match(s1: str, s2: str) -> float:
     return SequenceMatcher(None, s1.lower(), s2.lower()).ratio()
 
 
-def calculate_tf_idf_scores(segments: List[Dict], query_words: List[str]) -> Dict[int, float]:
+def calculate_tf_idf_scores(segments: List[Dict], query_words: List[str]) -> Tuple[Dict[int, float], Dict[int, Dict]]:
     """
     Calculate TF-IDF scores for segments based on query words.
     
@@ -66,7 +66,9 @@ def calculate_tf_idf_scores(segments: List[Dict], query_words: List[str]) -> Dic
         query_words: List of query words
         
     Returns:
-        Dictionary mapping segment index to TF-IDF score
+        Tuple of:
+          - scores: Dictionary mapping segment index to TF-IDF score
+          - all_word_scores: Dictionary mapping segment index to per-word breakdown
     """
     # Document frequency (how many segments contain each word)
     df = Counter()
@@ -80,10 +82,12 @@ def calculate_tf_idf_scores(segments: List[Dict], query_words: List[str]) -> Dic
     
     # Calculate scores
     scores = {}
+    all_word_scores = {}
     num_segments = len(segments)
     
     for idx, words in enumerate(segment_words):
         score = 0.0
+        word_scores = {}  # Track per-word scores for this segment
         for query_word in query_words:
             stemmed_query = simple_stem(query_word)
             
@@ -92,11 +96,16 @@ def calculate_tf_idf_scores(segments: List[Dict], query_words: List[str]) -> Dic
                 tf = 1.0  # Binary: word present or not
                 # Inverse document frequency
                 idf = num_segments / (df[stemmed_query] + 1)
-                score += tf * idf
+                word_score = tf * idf
+                score += word_score
+                word_scores[query_word] = {"stemmed": stemmed_query, "tf": tf, "idf": round(idf, 4), "score": round(word_score, 4)}
+            else:
+                word_scores[query_word] = {"stemmed": stemmed_query, "tf": 0, "idf": 0, "score": 0}
         
         scores[idx] = score
+        all_word_scores[idx] = word_scores
     
-    return scores
+    return scores, all_word_scores
 
 
 def search_transcription(
@@ -129,7 +138,7 @@ def search_transcription(
     results = []
     
     # Calculate TF-IDF scores for ranking
-    tfidf_scores = calculate_tf_idf_scores(segments, query_words)
+    tfidf_scores, tfidf_word_scores = calculate_tf_idf_scores(segments, query_words)
     
     # Search through segments
     for idx, segment in enumerate(segments):
@@ -143,6 +152,7 @@ def search_transcription(
                 match_type="exact",
                 score=100.0 + tfidf_scores.get(idx, 0.0),
                 query=query,
+                word_scores=tfidf_word_scores.get(idx),
             )
             results.append(match)
             continue
@@ -155,6 +165,7 @@ def search_transcription(
                 match_type="phrase",
                 score=95.0 + tfidf_scores.get(idx, 0.0),
                 query=query,
+                word_scores=tfidf_word_scores.get(idx),
             )
             results.append(match)
             continue
@@ -171,6 +182,7 @@ def search_transcription(
                     score=80.0 + tfidf_scores.get(idx, 0.0),
                     query=query,
                     matched_words=query_words,
+                    word_scores=tfidf_word_scores.get(idx),
                 )
                 results.append(match)
                 continue
@@ -182,6 +194,7 @@ def search_transcription(
                     score=80.0 + tfidf_scores.get(idx, 0.0),
                     query=query,
                     matched_words=query_words,
+                    word_scores=tfidf_word_scores.get(idx),
                 )
                 results.append(match)
                 continue
@@ -194,6 +207,7 @@ def search_transcription(
                 match_type="fuzzy",
                 score=fuzzy_score * 60.0 + tfidf_scores.get(idx, 0.0),
                 query=query,
+                word_scores=tfidf_word_scores.get(idx),
             )
             results.append(match)
             continue
@@ -214,6 +228,7 @@ def search_transcription(
                 score=match_ratio * 40.0 + tfidf_scores.get(idx, 0.0),
                 query=query,
                 matched_words=matching_words if not SEARCH_ENABLE_STEMMING else None,
+                word_scores=tfidf_word_scores.get(idx),
             )
             results.append(match)
     
@@ -235,7 +250,8 @@ def _create_match(
     match_type: str,
     score: float,
     query: str,
-    matched_words: List[str] = None
+    matched_words: List[str] = None,
+    word_scores: Dict = None,
 ) -> Dict:
     """
     Create a search match result.
@@ -246,6 +262,7 @@ def _create_match(
         score: Match score
         query: Original query
         matched_words: List of matched words (optional)
+        word_scores: Per-word TF-IDF breakdown (optional)
         
     Returns:
         Match result dictionary
@@ -263,6 +280,9 @@ def _create_match(
     
     if matched_words:
         match["matched_words"] = matched_words
+    
+    if word_scores:
+        match["word_scores"] = word_scores
     
     return match
 

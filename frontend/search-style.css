@@ -593,3 +593,95 @@ body {
     align-items: center;
 }
 
+/* Score Breakdown Panel */
+.score-breakdown-wrap {
+    margin-top: 0.75rem;
+}
+
+.score-toggle-btn {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+}
+
+.score-toggle-btn:hover {
+    background: rgba(99, 102, 241, 0.18);
+    color: var(--text-main);
+    border-color: var(--primary);
+}
+
+.score-badge {
+    background: rgba(99, 102, 241, 0.25);
+    color: var(--primary);
+    padding: 0.15rem 0.55rem;
+    border-radius: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.score-breakdown-table {
+    margin-top: 0.5rem;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+}
+
+.score-table thead tr {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.score-table th {
+    padding: 0.45rem 0.75rem;
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+}
+
+.score-cell {
+    padding: 0.4rem 0.75rem;
+    font-family: 'Outfit', monospace;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.score-stemmed {
+    color: rgba(148, 163, 184, 0.6);
+    font-style: italic;
+}
+
+.score-row.score-hit {
+    background: rgba(16, 185, 129, 0.06);
+}
+
+.score-row.score-miss {
+    background: transparent;
+    opacity: 0.6;
+}
+
+.score-val {
+    font-weight: 700;
+}
+
+.score-hit-val {
+    color: var(--success);
+}
+

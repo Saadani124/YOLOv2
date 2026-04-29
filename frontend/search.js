@@ -428,9 +428,45 @@ function renderResults(results, query) {
             text = `Visual Text: <b>${highlight(displayText, query)}</b> (Confidence: ${res.confidence}%)`;
         }
 
+        // Build word score breakdown HTML (only for transcript tab)
+        let wordScoreHTML = '';
+        if (activeTab === 'transcript' && res.word_scores && Object.keys(res.word_scores).length > 0) {
+            const rows = Object.entries(res.word_scores).map(([word, info]) => {
+                const hit = info.score > 0;
+                return `
+                    <tr class="score-row ${hit ? 'score-hit' : 'score-miss'}">
+                        <td class="score-cell">${word}</td>
+                        <td class="score-cell score-stemmed">${info.stemmed}</td>
+                        <td class="score-cell">${info.tf}</td>
+                        <td class="score-cell">${info.idf}</td>
+                        <td class="score-cell score-val ${hit ? 'score-hit-val' : ''}">${info.score}</td>
+                    </tr>`;
+            }).join('');
+
+            const breakdownId = `breakdown-${Math.random().toString(36).slice(2)}`;
+            wordScoreHTML = `
+                <div class="score-breakdown-wrap">
+                    <button class="score-toggle-btn" onclick="event.stopPropagation(); toggleBreakdown('${breakdownId}')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        Score breakdown &nbsp;<span class="score-badge">TF-IDF: ${res.score}</span>
+                    </button>
+                    <div id="${breakdownId}" class="score-breakdown-table hidden">
+                        <table class="score-table">
+                            <thead>
+                                <tr>
+                                    <th>Word</th><th>Stemmed</th><th>TF</th><th>IDF</th><th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>`;
+        }
+
         item.innerHTML = `
             <span class="result-time">${time}</span>
             <div class="result-text">${text}</div>
+            ${wordScoreHTML}
             <div class="result-item-footer">
                 <button class="download-btn" onclick="event.stopPropagation(); downloadClip('${res.start || res.start_time}', '${res.end || res.end_time || (res.start || res.start_time) + 10}')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -450,6 +486,11 @@ function renderResults(results, query) {
         
         resultsList.appendChild(item);
     });
+}
+
+function toggleBreakdown(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden');
 }
 
 async function downloadClip(start, end) {
