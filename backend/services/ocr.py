@@ -111,7 +111,7 @@ def detect_text_in_video(video_path: str, fps: float = None, task_id: str = None
                 if task_id:
                     progress = (processed_frames / total_to_process) * 100
                     message = f"Scanning text in frame {frame_number}/{total_frames}..."
-                    progress_manager.update_progress(video_id=task_id, step="indexing", percentage=min(progress, 99), message=message)
+                    progress_manager.update_progress(task_id=task_id, stage="indexing", progress=min(progress, 99), message=message)
                     
                     if processed_frames % max(1, (total_to_process // 10)) == 0:
                         progress_manager.add_log(task_id, f"  OCR Progress: {progress:.1f}% ({len(detections)} words found)")

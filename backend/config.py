@@ -59,8 +59,8 @@ OBJECT_DETECTION_INTERVAL = 1.0  # Optional interval setting
 ENABLE_OCR = True  # Enable/disable text detection in video frames
 OCR_INTERVAL = 1.0  # Extract frame every N seconds for OCR
 
-# Determine YOLO model path (YOLOv12n turbo - attention-centric, faster & more accurate than YOLOv8)
-yolo_filename = "yolov12n.pt"
+# Determine YOLO model path (Falling back to YOLOv8n due to YOLOv12n AAttn compatibility issues)
+yolo_filename = "yolov8n.pt"
 yolo_in_models = os.path.join(MODELS_DIR, yolo_filename)
 yolo_in_backend = os.path.join(BASE_DIR, yolo_filename)
 
