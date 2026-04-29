@@ -423,6 +423,9 @@ function renderResults(results, query) {
             text = highlight(res.text, query);
         } else if (activeTab === 'objects') {
             text = `Detected <b>${res.object_class}</b> (Confidence: ${res.confidence}%)`;
+        } else if (activeTab === 'visual-text') {
+            const displayText = res.text || res.object_class || 'Unknown Text';
+            text = `Visual Text: <b>${highlight(displayText, query)}</b> (Confidence: ${res.confidence}%)`;
         }
 
         item.innerHTML = `

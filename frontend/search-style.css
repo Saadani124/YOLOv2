@@ -172,6 +172,12 @@ body {
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
 }
 
+.video-dropdown option {
+    background-color: #1e293b;
+    color: white;
+    padding: 10px;
+}
+
 /* Search Layout */
 .search-layout {
     display: grid;

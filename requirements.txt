@@ -24,3 +24,4 @@ pillow
 tqdm
 PyYAML
 watchfiles
+pytesseract

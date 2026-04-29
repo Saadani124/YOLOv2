@@ -108,7 +108,7 @@ async def search_visual_text_endpoint(
     results = []
     for t in db_texts:
         results.append({
-            "object_class": t.text,
+            "text": t.text,
             "start_time": t.timestamp,
             "end_time": t.timestamp,
             "start_formatted": format_time(t.timestamp),

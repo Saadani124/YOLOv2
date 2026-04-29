@@ -32,20 +32,27 @@ def transcribe_video(video_path: str, task_id: Optional[str] = None) -> Dict:
     if task_id:
         progress_manager.update_progress(task_id, "transcribing", 10, "Loading audio and model...")
 
-    result = model.transcribe(
-        video_path,
-        word_timestamps=ENABLE_WORD_TIMESTAMPS,
-        verbose=False,
-        fp16=WHISPER_FP16,
-    )
-    
-    if task_id:
-        detected_lang = result.get("language", "unknown")
-        progress_manager.add_log(task_id, f"Detected language: {detected_lang}")
-        progress_manager.update_progress(task_id, "transcribing", 100, "Transcription complete!")
-    
-    print(f"Transcription complete!")
-    return result
+    try:
+        result = model.transcribe(
+            video_path,
+            word_timestamps=ENABLE_WORD_TIMESTAMPS,
+            verbose=False,
+            fp16=WHISPER_FP16,
+        )
+        
+        if task_id:
+            detected_lang = result.get("language", "unknown")
+            progress_manager.add_log(task_id, f"Detected language: {detected_lang}")
+            progress_manager.update_progress(task_id, "transcribing", 100, "Transcription complete!")
+        
+        print(f"Transcription complete!")
+        return result
+    except Exception as e:
+        print(f"Transcription failed (possibly no audio stream): {e}")
+        if task_id:
+            progress_manager.add_log(task_id, f"Transcription skipped (no audio or error)")
+            progress_manager.update_progress(task_id, "transcribing", 100, "Transcription skipped")
+        return {"text": "", "segments": [], "language": "unknown"}
 
 
 def process_transcription_segments(whisper_result: Dict) -> List[TranscriptSegment]:

@@ -1,44 +1,38 @@
 """
 OCR Service for ScanVD
-Detects visual text in video frames using EasyOCR
+Detects visual text in video frames using Tesseract OCR (via pytesseract)
 """
 from typing import List, Dict, Optional
 import cv2
 import numpy as np
-from config import ENABLE_OCR, OCR_INTERVAL, DEVICE
+import pytesseract
+from config import ENABLE_OCR, OCR_INTERVAL
 from core.progress import progress_manager
 
-# Global OCR reader
-_ocr_reader = None
+# Note: On Windows, you may need to point to the tesseract executable:
+# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def init_ocr_model():
     """
-    Initialize the EasyOCR reader.
+    Check if Tesseract is available.
     """
-    global _ocr_reader
-    
     if not ENABLE_OCR:
         print("⚠️  OCR is disabled in config")
-        return None
+        return False
     
-    if _ocr_reader is None:
-        try:
-            print(f"Initializing EasyOCR reader on {DEVICE.upper()}...")
-            import easyocr
-            # We only use 'en' by default, can be expanded
-            use_gpu = (DEVICE == 'cuda')
-            _ocr_reader = easyocr.Reader(['en'], gpu=use_gpu)
-            print("✓ EasyOCR reader loaded successfully!")
-        except Exception as e:
-            print(f"❌ Failed to load EasyOCR: {e}")
-            return None
-            
-    return _ocr_reader
+    try:
+        version = pytesseract.get_tesseract_version()
+        print(f"✓ Tesseract OCR detected (version {version})")
+        return True
+    except Exception as e:
+        print(f"❌ Tesseract OCR not found or not in PATH: {e}")
+        print("   Please install Tesseract OCR and add it to your PATH.")
+        return False
 
 
 def detect_text_in_video(video_path: str, fps: float = None, task_id: str = None) -> List[Dict]:
     """
-    Extract frames from video and run OCR on them.
+    Extract frames from video and run Tesseract OCR on them.
     
     Args:
         video_path: Path to the video file
@@ -51,8 +45,10 @@ def detect_text_in_video(video_path: str, fps: float = None, task_id: str = None
     if not ENABLE_OCR:
         return []
         
-    reader = init_ocr_model()
-    if not reader:
+    is_available = init_ocr_model()
+    if not is_available:
+        if task_id:
+            progress_manager.add_log(task_id, "⚠️ OCR Skipped: Tesseract not found on system.")
         return []
         
     try:
@@ -85,32 +81,29 @@ def detect_text_in_video(video_path: str, fps: float = None, task_id: str = None
             if frame_number % frame_interval == 0:
                 timestamp = frame_number / fps
                 
-                # Convert BGR to RGB for EasyOCR
+                # Convert BGR to RGB for Tesseract
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 
-                # Run OCR
-                results = reader.readtext(rgb_frame)
+                # Run OCR using image_to_data for bbox and confidence
+                # Output is a dictionary with keys: level, page_num, block_num, par_num, line_num, word_num, left, top, width, height, conf, text
+                data = pytesseract.image_to_data(rgb_frame, output_type=pytesseract.Output.DICT)
                 
                 # Extract detections
-                for (bbox, text, prob) in results:
-                    if prob >= 0.4: # Only keep reasonable confidence
-                        # bbox is [ [top_left], [top_right], [bottom_right], [bottom_left] ]
-                        # x, y coords
-                        x_coords = [p[0] for p in bbox]
-                        y_coords = [p[1] for p in bbox]
-                        x1, x2 = min(x_coords), max(x_coords)
-                        y1, y2 = min(y_coords), max(y_coords)
-                        
+                for i in range(len(data['text'])):
+                    text = data['text'][i].strip()
+                    conf = float(data['conf'][i])
+                    
+                    if text and conf >= 40: # Tesseract confidence is 0-100, we use 40 as threshold
                         detections.append({
                             "frame_number": frame_number,
                             "timestamp": timestamp,
                             "text": text,
-                            "confidence": float(prob),
+                            "confidence": conf / 100.0, # Convert to 0.0-1.0 scale
                             "bbox": {
-                                "x": float(x1),
-                                "y": float(y1),
-                                "width": float(x2 - x1),
-                                "height": float(y2 - y1)
+                                "x": float(data['left'][i]),
+                                "y": float(data['top'][i]),
+                                "width": float(data['width'][i]),
+                                "height": float(data['height'][i])
                             }
                         })
                 
@@ -118,7 +111,7 @@ def detect_text_in_video(video_path: str, fps: float = None, task_id: str = None
                 if task_id:
                     progress = (processed_frames / total_to_process) * 100
                     message = f"Scanning text in frame {frame_number}/{total_frames}..."
-                    progress_manager.update_progress(task_id, "ocr", min(progress, 99), message)
+                    progress_manager.update_progress(video_id=task_id, step="indexing", percentage=min(progress, 99), message=message)
                     
                     if processed_frames % max(1, (total_to_process // 10)) == 0:
                         progress_manager.add_log(task_id, f"  OCR Progress: {progress:.1f}% ({len(detections)} words found)")

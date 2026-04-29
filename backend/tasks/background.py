@@ -35,7 +35,14 @@ async def process_video_background(
         segments = process_transcription_segments(whisper_result)
         full_text = get_full_text(whisper_result)
         language = get_language(whisper_result)
-        duration = segments[-1].end if segments else 0.0
+        
+        # Calculate duration using cv2 for better accuracy (and fallback if no audio)
+        import cv2
+        cap = cv2.VideoCapture(video_path)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        cap.release()
+        duration = (total_frames / fps) if fps > 0 else (segments[-1].end if segments else 0.0)
         
         # 2. Initial Database Record
         progress_manager.update_progress(video_id, "indexing", 0, "Saving video metadata...")
