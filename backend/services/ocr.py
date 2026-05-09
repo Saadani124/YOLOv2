@@ -69,54 +69,54 @@ def detect_text_in_video(video_path: str, fps: float = None, task_id: str = None
             progress_manager.add_log(task_id, f"  OCR Processing every {frame_interval} frames ({OCR_INTERVAL}s interval)")
         
         detections = []
-        frame_number = 0
         processed_frames = 0
         
-        while True:
+        for i in range(total_to_process):
+            target_frame = i * frame_interval
+            if target_frame >= total_frames:
+                break
+                
+            # Seek to target frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
             ret, frame = cap.read()
             if not ret:
                 break
             
-            # Process frame at intervals
-            if frame_number % frame_interval == 0:
-                timestamp = frame_number / fps
-                
-                # Convert BGR to RGB for Tesseract
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                
-                # Run OCR using image_to_data for bbox and confidence
-                # Output is a dictionary with keys: level, page_num, block_num, par_num, line_num, word_num, left, top, width, height, conf, text
-                data = pytesseract.image_to_data(rgb_frame, output_type=pytesseract.Output.DICT)
-                
-                # Extract detections
-                for i in range(len(data['text'])):
-                    text = data['text'][i].strip()
-                    conf = float(data['conf'][i])
-                    
-                    if text and conf >= 40: # Tesseract confidence is 0-100, we use 40 as threshold
-                        detections.append({
-                            "frame_number": frame_number,
-                            "timestamp": timestamp,
-                            "text": text,
-                            "confidence": conf / 100.0, # Convert to 0.0-1.0 scale
-                            "bbox": {
-                                "x": float(data['left'][i]),
-                                "y": float(data['top'][i]),
-                                "width": float(data['width'][i]),
-                                "height": float(data['height'][i])
-                            }
-                        })
-                
-                processed_frames += 1
-                if task_id:
-                    progress = (processed_frames / total_to_process) * 100
-                    message = f"Scanning text in frame {frame_number}/{total_frames}..."
-                    progress_manager.update_progress(task_id=task_id, stage="indexing", progress=min(progress, 99), message=message)
-                    
-                    if processed_frames % max(1, (total_to_process // 10)) == 0:
-                        progress_manager.add_log(task_id, f"  OCR Progress: {progress:.1f}% ({len(detections)} words found)")
+            timestamp = target_frame / fps
             
-            frame_number += 1
+            # Convert BGR to RGB for Tesseract
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Run OCR using image_to_data for bbox and confidence
+            data = pytesseract.image_to_data(rgb_frame, output_type=pytesseract.Output.DICT)
+            
+            # Extract detections
+            for j in range(len(data['text'])):
+                text = data['text'][j].strip()
+                conf = float(data['conf'][j])
+                
+                if text and conf >= 40: # Tesseract confidence is 0-100
+                    detections.append({
+                        "frame_number": target_frame,
+                        "timestamp": timestamp,
+                        "text": text,
+                        "confidence": conf / 100.0,
+                        "bbox": {
+                            "x": float(data['left'][j]),
+                            "y": float(data['top'][j]),
+                            "width": float(data['width'][j]),
+                            "height": float(data['height'][j])
+                        }
+                    })
+            
+            processed_frames += 1
+            if task_id:
+                progress = (processed_frames / total_to_process) * 100
+                message = f"Scanning text in frame {target_frame}/{total_frames}..."
+                progress_manager.update_progress(task_id=task_id, stage="indexing", progress=min(progress, 99), message=message)
+                
+                if processed_frames % max(1, (total_to_process // 10)) == 0:
+                    progress_manager.add_log(task_id, f"  OCR Progress: {progress:.1f}% ({len(detections)} words found)")
         
         cap.release()
         

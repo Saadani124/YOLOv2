@@ -102,67 +102,68 @@ def detect_objects_in_video(video_path: str, fps: Optional[float] = None, task_i
             progress_manager.add_log(task_id, f"  Processing every {frame_interval} frames ({OBJECT_DETECTION_INTERVAL}s interval)")
         
         detections = []
-        frame_number = 0
         processed_frames = 0
         
-        while True:
+        for i in range(total_to_process):
+            target_frame = i * frame_interval
+            if target_frame >= total_frames:
+                break
+                
+            # Seek to target frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
             ret, frame = cap.read()
             if not ret:
                 break
             
-            # Process frame at intervals
-            if frame_number % frame_interval == 0:
-                timestamp = frame_number / fps
-                
-                # Run detection with optimized parameters
-                results = _detection_model(
-                    frame, 
-                    verbose=False,
-                    device=DEVICE,
-                    half=(DEVICE == "cuda"), # Use FP16 if on GPU for massive speedup
-                    imgsz=640,               # Standard optimal size
-                    conf=0.45,               # Filter low confidence early to save CPU
-                    iou=0.45                 # Standard NMS threshold
-                )
-                
-                # Extract detections
-                for result in results:
-                    boxes = result.boxes
-                    for box in boxes:
-                        # Get box coordinates
-                        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-                        
-                        # Get confidence and class
-                        confidence = float(box.conf[0].cpu().numpy())
-                        class_id = int(box.cls[0].cpu().numpy())
-                        class_name = result.names[class_id]
-                        
-                        # Only keep high-confidence detections
-                        if confidence >= 0.5:
-                            detections.append({
-                                "frame_number": frame_number,
-                                "timestamp": timestamp,
-                                "object_class": class_name,
-                                "confidence": confidence,
-                                "bbox": {
-                                    "x": float(x1),
-                                    "y": float(y1),
-                                    "width": float(x2 - x1),
-                                    "height": float(y2 - y1)
-                                }
-                            })
-                
-                processed_frames += 1
-                if task_id:
-                    progress = (processed_frames / total_to_process) * 100
-                    message = f"Analyzing frame {frame_number}/{total_frames}..."
-                    progress_manager.update_progress(task_id, "detecting", min(progress, 99), message)
-                    
-                    # Every 10% or so, add a log line
-                    if processed_frames % max(1, (total_to_process // 10)) == 0:
-                        progress_manager.add_log(task_id, f"  Progress: {progress:.1f}% ({len(detections)} objects detected)")
+            timestamp = target_frame / fps
             
-            frame_number += 1
+            # Run detection with optimized parameters
+            results = _detection_model(
+                frame, 
+                verbose=False,
+                device=DEVICE,
+                half=(DEVICE == "cuda"), # Use FP16 if on GPU for massive speedup
+                imgsz=640,               # Standard optimal size
+                conf=0.45,               # Filter low confidence early to save CPU
+                iou=0.45                 # Standard NMS threshold
+            )
+            
+            # Extract detections
+            for result in results:
+                boxes = result.boxes
+                for box in boxes:
+                    # Get box coordinates
+                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                    
+                    # Get confidence and class
+                    confidence = float(box.conf[0].cpu().numpy())
+                    class_id = int(box.cls[0].cpu().numpy())
+                    class_name = result.names[class_id]
+                    
+                    # Only keep high-confidence detections
+                    if confidence >= 0.5:
+                        detections.append({
+                            "frame_number": target_frame,
+                            "timestamp": timestamp,
+                            "object_class": class_name,
+                            "confidence": confidence,
+                            "bbox": {
+                                "x": float(x1),
+                                "y": float(y1),
+                                "width": float(x2 - x1),
+                                "height": float(y2 - y1)
+                            }
+                        })
+            
+            processed_frames += 1
+            if task_id:
+                progress = (processed_frames / total_to_process) * 100
+                message = f"Analyzing frame {target_frame}/{total_frames}..."
+                progress_manager.update_progress(task_id, "detecting", min(progress, 99), message)
+                
+                # Every 10% or so, add a log line
+                if processed_frames % max(1, (total_to_process // 10)) == 0:
+                    progress_manager.add_log(task_id, f"  Progress: {progress:.1f}% ({len(detections)} objects detected)")
         
         cap.release()
         
