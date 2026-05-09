@@ -97,11 +97,20 @@ async def delete_video_endpoint(video_id: str, db: Session = Depends(get_db)):
     video = get_video(db, video_id)
     if not video: raise HTTPException(status_code=404, detail="Video not found.")
     
+    # 1. Remove the video file
     if os.path.exists(video.file_path):
         try:
             os.remove(video.file_path)
         except Exception as e:
-            print(f"Warning: Could not delete file {video.file_path}: {e}")
+            print(f"Warning: Could not delete video file {video.file_path}: {e}")
+            
+    # 2. Remove the thumbnail file
+    thumbnail_path = os.path.join(UPLOAD_DIR, f"{video_id}.jpg")
+    if os.path.exists(thumbnail_path):
+        try:
+            os.remove(thumbnail_path)
+        except Exception as e:
+            print(f"Warning: Could not delete thumbnail file {thumbnail_path}: {e}")
             
     delete_video(db, video_id)
     return {"message": f"Video {video_id} deleted successfully"}

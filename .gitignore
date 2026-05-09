@@ -30,3 +30,7 @@ Thumbs.db
 *.mp4
 *.avi
 *.mkv
+
+# Application Data
+backend/uploads/
+backend/models/

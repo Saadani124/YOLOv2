@@ -79,6 +79,32 @@ INDEXV2/
 
 ---
 
+## 🤖 Model Setup
+
+VOCO v2 uses several AI models for processing. By default, the system will **automatically download** these models on the first run. However, you can also set them up manually.
+
+### Automatic Download (Recommended)
+Just start the application. The following models will be downloaded to `backend/models/`:
+*   **Whisper (base):** ~140MB (Audio Transcription)
+*   **YOLOv8n:** ~6MB (Object Detection)
+*   **EasyOCR/Tesseract:** Handled by their respective libraries.
+
+### Manual Download (Optional)
+If you are in a restricted network or want to pre-load models:
+
+1.  **YOLOv8:**
+    *   Download [yolov8n.pt](https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov8n.pt)
+    *   Place it in `backend/models/` or `backend/`.
+
+2.  **Whisper:**
+    *   The models are usually cached in `~/.cache/whisper`.
+    *   To change this, update `MODELS_DIR` in `backend/config.py`.
+
+> [!NOTE]
+> Ensure you have at least **2GB of free disk space** for all models and their dependencies.
+
+---
+
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
