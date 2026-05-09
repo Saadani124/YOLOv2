@@ -18,7 +18,23 @@ def create_video(
     language: str,
     full_text: str
 ) -> Video:
-
+    """
+    Create a new video record in the database.
+    
+    Args:
+        db: Database session
+        video_id: Unique UUID identifier for the video
+        filename: Name of the file stored on disk
+        original_name: Original name of the uploaded file
+        file_path: Absolute path to the video file
+        file_size: Size of the file in bytes
+        duration: Video duration in seconds
+        language: Detected language code (e.g., 'en')
+        full_text: Complete transcription text
+        
+    Returns:
+        The created Video object
+    """
     video = Video(
         video_id=video_id,
         filename=filename,
@@ -36,25 +52,23 @@ def create_video(
 
 
 def get_video(db: Session, video_id: str) -> Optional[Video]:
-
+    """Retrieve a video by its unique UUID."""
     return db.query(Video).filter(Video.video_id == video_id).first()
 
 
 def get_all_videos(db: Session, skip: int = 0, limit: int = 100) -> List[Video]:
-
+    """List all videos with pagination."""
     return db.query(Video).offset(skip).limit(limit).all()
 
 
 def delete_video(db: Session, video_id: str) -> bool:
-
+    """Delete a video record from the database."""
     video = get_video(db, video_id)
     if video:
         db.delete(video)
         db.commit()
         return True
     return False
-
-
 
 
 def create_segment(
@@ -65,9 +79,26 @@ def create_segment(
     end_time: float,
     text: str,
     speaker_db_id: Optional[int] = None,
-    confidence: Optional[float] = None
+    confidence: Optional[float] = None,
+    commit: bool = True
 ) -> Segment:
-
+    """
+    Create a transcription segment record.
+    
+    Args:
+        db: Database session
+        video_id: Associated video UUID
+        segment_id: Whisper-provided segment index
+        start_time: Start time in seconds
+        end_time: End time in seconds
+        text: Segment text content
+        speaker_db_id: ID of the speaker (if diarization is used)
+        confidence: Recognition confidence (0.0-1.0)
+        commit: If False, defers db.commit() for batch processing efficiency
+        
+    Returns:
+        The created Segment object
+    """
     segment = Segment(
         video_id=video_id,
         segment_id=segment_id,
@@ -77,22 +108,14 @@ def create_segment(
         confidence=confidence
     )
     db.add(segment)
-    db.commit()
-    db.refresh(segment)
+    if commit:
+        db.commit()
+        db.refresh(segment)
     return segment
 
 
 def get_segments_for_video(db: Session, video_id: str) -> List[Segment]:
-    """
-    Get all segments for a video.
-    
-    Args:
-        db: Database session
-        video_id: Video identifier
-        
-    Returns:
-        List of Segment objects ordered by start time
-    """
+    """Get all transcription segments for a specific video, ordered by time."""
     return db.query(Segment).filter(
         Segment.video_id == video_id
     ).order_by(Segment.start_time).all()
@@ -104,21 +127,23 @@ def create_word(
     word: str,
     start_time: float,
     end_time: float,
-    confidence: Optional[float] = None
+    confidence: Optional[float] = None,
+    commit: bool = True
 ) -> Word:
     """
-    Create a word timestamp record.
+    Create a word-level timestamp record.
     
     Args:
         db: Database session
-        segment_id: Parent segment database ID
-        word: The word text
+        segment_id: Parent segment internal ID (not UUID)
+        word: Individual word text
         start_time: Start time in seconds
         end_time: End time in seconds
-        confidence: Recognition confidence
+        confidence: Word-level confidence score
+        commit: If False, defers db.commit() for batch processing efficiency
         
     Returns:
-        Created Word object
+        The created Word object
     """
     word_obj = Word(
         segment_id=segment_id,
@@ -128,8 +153,9 @@ def create_word(
         confidence=confidence,
     )
     db.add(word_obj)
-    db.commit()
-    db.refresh(word_obj)
+    if commit:
+        db.commit()
+        db.refresh(word_obj)
     return word_obj
 
 
@@ -138,17 +164,7 @@ def search_segments(
     video_id: str,
     query: str
 ) -> List[Segment]:
-    """
-    Search segments by text content.
-    
-    Args:
-        db: Database session
-        video_id: Video to search in
-        query: Search query
-        
-    Returns:
-        List of matching Segment objects
-    """
+    """Search for segments containing specific text in a specific video."""
     return db.query(Segment).filter(
         Segment.video_id == video_id,
         Segment.text.like(f"%{query}%")
@@ -162,16 +178,7 @@ def log_search(
     result_count: int,
     clicked_result: bool = False
 ):
-    """
-    Log a search query for analytics.
-    
-    Args:
-        db: Database session
-        video_id: Video being searched
-        query: Search query
-        result_count: Number of results found
-        clicked_result: Whether user clicked a result
-    """
+    """Log search queries for analytics and popular search tracking."""
     search_log = SearchHistory(
         video_id=video_id,
         query=query,
@@ -183,17 +190,7 @@ def log_search(
 
 
 def get_popular_searches(db: Session, video_id: str, limit: int = 10) -> List[str]:
-    """
-    Get most popular searches for a video.
-    
-    Args:
-        db: Database session
-        video_id: Video identifier
-        limit: Maximum number of queries to return
-        
-    Returns:
-        List of popular search queries
-    """
+    """Retrieve the most frequent search queries for a video."""
     from sqlalchemy import func
     
     results = db.query(
@@ -211,16 +208,7 @@ def get_popular_searches(db: Session, video_id: str, limit: int = 10) -> List[st
 
 
 def segment_to_dict(segment: Segment, include_words: bool = False) -> Dict:
-    """
-    Convert Segment object to dictionary.
-    
-    Args:
-        segment: Segment database object
-        include_words: Whether to include word-level data
-        
-    Returns:
-        Dictionary representation
-    """
+    """Serialize a Segment object to a dictionary for API responses."""
     result = {
         "id": segment.segment_id,
         "start": segment.start_time,
@@ -245,8 +233,6 @@ def segment_to_dict(segment: Segment, include_words: bool = False) -> Dict:
     return result
 
 
-
-
 def create_object_detection(
     db: Session,
     video_id: str,
@@ -257,25 +243,27 @@ def create_object_detection(
     bbox_x: float = None,
     bbox_y: float = None,
     bbox_width: float = None,
-    bbox_height: float = None
+    bbox_height: float = None,
+    commit: bool = True
 ) -> ObjectDetection:
     """
     Create an object detection record.
     
     Args:
         db: Database session
-        video_id: Associated video ID
-        frame_number: Frame number in video
+        video_id: Associated video UUID
+        frame_number: Sequential frame index where object was found
         timestamp: Time in seconds
-        object_class: Detected object class (e.g., "car", "person")
-        confidence: Detection confidence (0.0-1.0)
-        bbox_x: Bounding box X coordinate (optional)
-        bbox_y: Bounding box Y coordinate (optional)
-        bbox_width: Bounding box width (optional)
-        bbox_height: Bounding box height (optional)
+        object_class: Label (e.g., 'person', 'dog')
+        confidence: YOLO confidence score (0.0-1.0)
+        bbox_x: Bounding box left coordinate
+        bbox_y: Bounding box top coordinate
+        bbox_width: Bounding box width
+        bbox_height: Bounding box height
+        commit: If False, defers db.commit() for batch processing efficiency
         
     Returns:
-        Created ObjectDetection object
+        The created ObjectDetection object
     """
     detection = ObjectDetection(
         video_id=video_id,
@@ -289,8 +277,9 @@ def create_object_detection(
         bbox_height=bbox_height
     )
     db.add(detection)
-    db.commit()
-    db.refresh(detection)
+    if commit:
+        db.commit()
+        db.refresh(detection)
     return detection
 
 
@@ -300,18 +289,7 @@ def get_detections_for_video(
     object_class: Optional[str] = None,
     min_confidence: float = 0.5
 ) -> List[ObjectDetection]:
-    """
-    Get object detections for a video, optionally filtered by class.
-    
-    Args:
-        db: Database session
-        video_id: Video identifier
-        object_class: Filter by object class (optional)
-        min_confidence: Minimum confidence threshold
-        
-    Returns:
-        List of ObjectDetection objects
-    """
+    """Retrieve object detections for a video, filtered by class or confidence."""
     query = db.query(ObjectDetection).filter(
         ObjectDetection.video_id == video_id,
         ObjectDetection.confidence >= min_confidence
@@ -324,16 +302,7 @@ def get_detections_for_video(
 
 
 def get_unique_objects_in_video(db: Session, video_id: str) -> List[str]:
-    """
-    Get list of unique object classes detected in a video.
-    
-    Args:
-        db: Database session
-        video_id: Video identifier
-        
-    Returns:
-        List of unique object class names
-    """
+    """Get a list of all unique object classes found in a video."""
     from sqlalchemy import distinct
     
     results = db.query(distinct(ObjectDetection.object_class)).filter(
@@ -344,22 +313,14 @@ def get_unique_objects_in_video(db: Session, video_id: str) -> List[str]:
 
 
 def detection_to_dict(detection: ObjectDetection) -> Dict:
-    """
-    Convert ObjectDetection object to dictionary.
-    
-    Args:
-        detection: ObjectDetection database object
-        
-    Returns:
-        Dictionary representation
-    """
+    """Serialize an ObjectDetection object to a dictionary."""
     return {
         "id": detection.id,
         "frame_number": detection.frame_number,
         "timestamp": detection.timestamp,
         "timestamp_formatted": format_time(detection.timestamp),
         "object_class": detection.object_class,
-        "confidence": round(detection.confidence * 100, 2),  # Convert to percentage
+        "confidence": round(detection.confidence * 100, 2),
         "bbox": {
             "x": detection.bbox_x,
             "y": detection.bbox_y,
@@ -375,17 +336,7 @@ def update_search_history_for_objects(
     query: str,
     result_count: int
 ):
-    """
-    Log an object search query.
-    
-    Args:
-        db: Database session
-        video_id: Video being searched
-        query: Search query (object class)
-        result_count: Number of results found
-    """
-    from database.core import SearchHistory
-    
+    """Log an object-based search query."""
     search_log = SearchHistory(
         video_id=video_id,
         query=query,
@@ -407,9 +358,21 @@ def create_visual_text(
     bbox_x: float = None,
     bbox_y: float = None,
     bbox_width: float = None,
-    bbox_height: float = None
+    bbox_height: float = None,
+    commit: bool = True
 ) -> VisualText:
-    """Create a visual text (OCR) record."""
+    """
+    Create a visual text (OCR) record.
+    
+    Args:
+        db: Database session
+        video_id: Associated video UUID
+        frame_number: Frame index
+        timestamp: Time in seconds
+        text: Detected text content
+        confidence: OCR confidence score (0.0-1.0)
+        commit: If False, defers db.commit() for batch processing efficiency
+    """
     vt = VisualText(
         video_id=video_id,
         frame_number=frame_number,
@@ -422,8 +385,9 @@ def create_visual_text(
         bbox_height=bbox_height
     )
     db.add(vt)
-    db.commit()
-    db.refresh(vt)
+    if commit:
+        db.commit()
+        db.refresh(vt)
     return vt
 
 
@@ -433,7 +397,7 @@ def get_visual_texts_for_video(
     text_query: Optional[str] = None,
     min_confidence: float = 0.5
 ) -> List[VisualText]:
-    """Get OCR texts for a video, optionally filtered by text."""
+    """Retrieve OCR results for a video, filtered by content."""
     query = db.query(VisualText).filter(
         VisualText.video_id == video_id,
         VisualText.confidence >= min_confidence
@@ -446,7 +410,7 @@ def get_visual_texts_for_video(
 
 
 def get_unique_words_in_video(db: Session, video_id: str) -> List[str]:
-    """Get list of unique OCR words detected in a video."""
+    """Get list of unique visual text strings detected in a video."""
     from sqlalchemy import distinct
     results = db.query(distinct(VisualText.text)).filter(
         VisualText.video_id == video_id
@@ -455,7 +419,7 @@ def get_unique_words_in_video(db: Session, video_id: str) -> List[str]:
 
 
 def visual_text_to_dict(vt: VisualText) -> Dict:
-    """Convert VisualText object to dictionary."""
+    """Serialize a VisualText object to a dictionary."""
     return {
         "id": vt.id,
         "frame_number": vt.frame_number,
@@ -474,17 +438,16 @@ def visual_text_to_dict(vt: VisualText) -> Dict:
 
 def search_global(db: Session, query: str) -> List[Dict]:
     """
-    Search across all videos for transcripts, objects, and OCR text.
+    Perform a unified search across all videos, checking transcripts, 
+    detected objects, and visual text (OCR).
     
     Args:
         db: Database session
-        query: Search query
+        query: User search string
         
     Returns:
-        List of GlobalSearchResult-compatible dictionaries
+        List of results grouped by video
     """
-    from sqlalchemy import or_
-    
     query_clean = query.strip().lower()
     if not query_clean:
         return []
@@ -511,7 +474,7 @@ def search_global(db: Session, query: str) -> List[Dict]:
             "timestamp_formatted": format_time(seg.start_time),
             "text": seg.text,
             "match_type": "transcript",
-            "score": 100.0  # Simple score for now
+            "score": 100.0
         })
         
     # 2. Search Objects
@@ -565,14 +528,23 @@ def search_global(db: Session, query: str) -> List[Dict]:
         results_by_video[vid_id]["matches"].sort(key=lambda x: x["timestamp"])
         
     return list(results_by_video.values())
+
 def get_collection_stats(db: Session) -> Dict:
+    """Aggregate statistics for the entire video collection (languages, objects, text)."""
     from sqlalchemy import func, distinct
+    
+    # Language distribution
     languages = db.query(Video.language, func.count(Video.id)).group_by(Video.language).all()
     lang_stats = [{"value": l[0], "count": l[1]} for l in languages if l[0]]
+    
+    # Top detected objects
     objects = db.query(ObjectDetection.object_class, func.count(distinct(ObjectDetection.video_id))).group_by(ObjectDetection.object_class).order_by(func.count(distinct(ObjectDetection.video_id)).desc()).limit(15).all()
     obj_stats = [{"value": o[0], "count": o[1]} for o in objects]
+    
+    # Top visual text occurrences
     ocr = db.query(VisualText.text, func.count(distinct(VisualText.video_id))).group_by(VisualText.text).order_by(func.count(distinct(VisualText.video_id)).desc()).limit(15).all()
     ocr_stats = [{"value": t[0], "count": t[1]} for t in ocr]
+    
     return {
         "languages": lang_stats,
         "objects": obj_stats,
@@ -580,6 +552,7 @@ def get_collection_stats(db: Session) -> Dict:
     }
 
 def get_videos_by_collection(db: Session, category: str, value: str) -> List[Video]:
+    """Filter videos based on collection statistics (e.g., all videos with 'person' detected)."""
     if category == "language":
         return db.query(Video).filter(Video.language == value).all()
     elif category == "object":
@@ -587,4 +560,3 @@ def get_videos_by_collection(db: Session, category: str, value: str) -> List[Vid
     elif category == "ocr":
         return db.query(Video).join(VisualText).filter(VisualText.text == value).distinct().all()
     return []
-

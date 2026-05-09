@@ -69,6 +69,7 @@ async def process_video_background(
             progress_manager.update_progress(video_id, "detecting", 0, "Starting object detection...")
             detections = await asyncio.to_thread(detect_objects_in_video, video_path, None, video_id)
             if detections:
+                progress_manager.add_log(video_id, f"  Saving {len(detections)} object detections to database...")
                 for detection in detections:
                     create_object_detection(
                         db=db,
@@ -80,14 +81,17 @@ async def process_video_background(
                         bbox_x=detection["bbox"]["x"],
                         bbox_y=detection["bbox"]["y"],
                         bbox_width=detection["bbox"]["width"],
-                        bbox_height=detection["bbox"]["height"]
+                        bbox_height=detection["bbox"]["height"],
+                        commit=False # Batch commit later
                     )
+                db.commit() # Commit all detections at once
                 
         # 3.5 OCR
         if ENABLE_OCR:
             progress_manager.update_progress(video_id, "indexing", 0, "Scanning for visual text...")
             visual_texts = await asyncio.to_thread(detect_text_in_video, video_path, None, video_id)
             if visual_texts:
+                progress_manager.add_log(video_id, f"  Saving {len(visual_texts)} OCR results to database...")
                 for text_item in visual_texts:
                     create_visual_text(
                         db=db,
@@ -99,8 +103,10 @@ async def process_video_background(
                         bbox_x=text_item["bbox"]["x"],
                         bbox_y=text_item["bbox"]["y"],
                         bbox_width=text_item["bbox"]["width"],
-                        bbox_height=text_item["bbox"]["height"]
+                        bbox_height=text_item["bbox"]["height"],
+                        commit=False # Batch commit later
                     )
+                db.commit() # Commit all OCR results at once
         
         # 4. Save Segments and Words
         progress_manager.update_progress(video_id, "indexing", 50, "Saving transcription segments...")
@@ -111,8 +117,12 @@ async def process_video_background(
                 segment_id=seg.id,
                 start_time=seg.start,
                 end_time=seg.end,
-                text=seg.text
+                text=seg.text,
+                commit=False # Commit after words are added
             )
+            # We must flush to get the db_segment.id for the word foreign key
+            db.flush() 
+            
             if seg.words:
                 for w in seg.words:
                     create_word(
@@ -120,8 +130,12 @@ async def process_video_background(
                         segment_id=db_segment.id,
                         word=w.word,
                         start_time=w.start,
-                        end_time=w.end
+                        end_time=w.end,
+                        commit=False # Commit after all words in segment
                     )
+        
+        # Final commit for segments and words
+        db.commit()
         
         progress_manager.complete_task(video_id, "Video processed and indexed successfully!")
         print(f"Background processing complete for {video_id}")
