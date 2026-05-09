@@ -187,10 +187,11 @@ The system is highly configurable via `backend/config.py`:
 
 - **Bug Reports:** Open an issue on GitHub.
 - **Pull Requests:** Feel free to submit enhancements.
+- **Feedback:** Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 🤝 Contributing
+## 📜 License
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+This project is licensed under the MIT License.
 
